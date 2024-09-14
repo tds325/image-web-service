@@ -1,0 +1,7 @@
+name: /home/tayler/Documents/repositories/image-web-service/env
+channels:
+  - defaults
+dependencies:
+  - werkzeug
+  - pillow
+prefix: /home/tayler/Documents/repositories/image-web-service/env
