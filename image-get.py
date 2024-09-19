@@ -1,7 +1,9 @@
+from __future__ import annotations
 import os, json
 from random import randint
 from io import StringIO, BytesIO
-from PIL import Image, ExifTags
+from PIL import Image
+import exiftool
 from werkzeug.wrappers import Request, Response
 from werkzeug.utils import redirect, send_file, send_from_directory, secure_filename
 from werkzeug.routing import Map, Rule
@@ -33,12 +35,10 @@ class ImageService(object):
     def on_random_image_details(self, request):
         fullpath = random_file(self.img_directory)
         try:
-            image = Image.open(fullpath)
-            im = open(fullpath, "rb")
-        except OSError as e:
-            return InternalServerError("unable to open image")
-
-        return send_file(im, request.environ, mimetype = f'image/{image.format}')
+            metadata = get_image_metadata(fullpath)
+        except Exception as e:
+            return InternalServerError("unable to parse image metadata")
+        return Response(metadata, mimetype = f'text/json')
 
     def on_get_image_by_name(self, request, name):
         name = secure_filename(name)
@@ -46,7 +46,11 @@ class ImageService(object):
 
     def on_image_details(self, request, name):
         name = secure_filename(name)
-        return Response(f"Hello {name} details", mimetype = 'text/html')
+        try:
+            metadata = get_image_metadata(name)
+        except Exception as e:
+            return InternalServerError("unable to parse image metadata")
+        return Response(metadata, mimetype = f'text/json')
 
     def on_list_images(self, request):
         img_list = os.listdir(self.img_directory)
@@ -70,13 +74,18 @@ class ImageService(object):
     def __call__(self, environ, start_response):
         return self.wsgi_app(environ, start_response)
 
-def is_valid_url(url):
+def is_valid_url(url:str)->bool:
     parts = urlparse(url)
     return parts.scheme in ('http', 'https')
 
-def random_file(dirpath):
+def random_file(dirpath:str)->str: 
     files = os.listdir(dirpath)
     return dirpath + files[randint(0, len(files)-1)]
+
+def get_image_metadata(file:str)->str:
+    with exiftool.ExifToolHelper() as et:
+        metadata = et.execute(file, "-j")
+        return metadata
 
 if __name__ == '__main__':
     from werkzeug.serving import run_simple
