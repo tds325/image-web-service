@@ -45,7 +45,7 @@ class ImageService(object):
         return send_from_directory(self.img_directory, name, request.environment)
 
     def on_image_details(self, request, name):
-        name = secure_filename(name)
+        name = self.img_directory + secure_filename(name)
         try:
             metadata = get_image_metadata(name)
         except Exception as e:
