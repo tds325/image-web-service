@@ -19,7 +19,7 @@ class ImageService(object):
             Rule('/<name>+', endpoint='image_details'),
             Rule('/list', endpoint='list_images'),
         ])
-        self.img_directory = "/home/tayler/Documents/repositories/Img/images/"
+        self.img_directory = "/srv/Pictures/"
 
     def on_get_random_image(self, request):
         fullpath = random_file(self.img_directory)
@@ -82,12 +82,9 @@ def random_file(dirpath:str)->str:
     files = os.listdir(dirpath)
     return dirpath + files[randint(0, len(files)-1)]
 
-def get_image_metadata(file:str)->str:
+def get_image_metadata(file:str)->str | bytes:
     with exiftool.ExifToolHelper() as et:
         metadata = et.execute(file, "-j")
         return metadata
 
-if __name__ == '__main__':
-    from werkzeug.serving import run_simple
-    app = ImageService({})
-    run_simple('127.0.0.1', 5000, app, use_debugger = True, use_reloader = True)
+application = ImageService({})
