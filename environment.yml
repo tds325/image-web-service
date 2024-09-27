@@ -1,7 +1,11 @@
-name: /home/tayler/Documents/repositories/image-web-service/env
+name: env
 channels:
+  - conda-forge
   - defaults
 dependencies:
   - werkzeug
   - pillow
-prefix: /home/tayler/Documents/repositories/image-web-service/env
+  - pip
+  - pip:
+    - git+https://github.com/smarnach/pyexiftool.git
+  - conda-forge::exiftool
