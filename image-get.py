@@ -42,7 +42,7 @@ class ImageService(object):
 
     def on_get_image_by_name(self, request, name):
         name = secure_filename(name)
-        return send_from_directory(self.img_directory, name, request.environment)
+        return send_from_directory(self.img_directory, name, request.environ)
 
     def on_image_details(self, request, name):
         name = self.img_directory + secure_filename(name)
